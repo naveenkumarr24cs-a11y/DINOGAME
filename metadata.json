@@ -1,0 +1,6 @@
+{
+  "name": "Dino Dash 3D",
+  "description": "A fully playable, high-fidelity 3D Dino Runner game built with Three.js.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

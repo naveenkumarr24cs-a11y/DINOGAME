@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>DINO DASH 3D</title>
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Pure Vanilla CSS Stylesheet -->
+  <link rel="stylesheet" href="/style.css" />
+  
+  <!-- Import Map to resolve bare specifiers in JSM ES Modules -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Embedded Three.js WebGL Canvas -->
+  <div id="canvas-container"></div>
+
+  <!-- Main Sound Indicator/Toggle on Desktop -->
+  <div id="quick-sound-toggle" class="sound-on" title="Toggle Music & Sound" aria-label="Toggle sound and music" role="button" tabindex="0">🔊</div>
+
+  <!-- Dynamic Game HUD & Overlays -->
+  <div id="ui-container">
+    
+    <!-- 1. LOADING SCREEN -->
+    <div id="loading-screen" class="ui-screen active">
+      <!-- Cinematic Intro Overlay -->
+      <div id="cinematic-intro-overlay" class="cinematic-intro">
+        <!-- Meteor streak container -->
+        <div class="meteor-container"></div>
+        
+        <div class="intro-title-container">
+          <div id="intro-title" class="intro-title"></div>
+          <p id="intro-tagline" class="intro-tagline">A PREHISTORIC SURVIVAL STORY</p>
+        </div>
+        
+        <div id="intro-credit" class="intro-credit">PRESENTED BY NAVEEN KUMAR</div>
+      </div>
+
+      <!-- Horizontal Sliding Wipe Div -->
+      <div id="cinematic-wipe" class="cinematic-wipe"></div>
+
+      <!-- Real Loader Content underneath/behind wipe -->
+      <div class="loader-content">
+        <h1 class="logo-title">DINO DASH 3D</h1>
+        <p id="loader-phrase" class="loader-subtitle">Assembling prehistoric assets...</p>
+        <div class="progress-bar-container">
+          <div id="loading-bar-fill" style="width: 0%;"></div>
+        </div>
+        <p id="loading-percentage">0%</p>
+      </div>
+    </div>
+
+    <!-- 2. MAIN MENU / CHARACTER SELECTION SCREEN -->
+    <div id="home-screen" class="ui-screen">
+      <!-- Programmatic Particle Layer Behind UI -->
+      <div id="home-particles-container"></div>
+
+      <!-- Left Side Space to Start Hint (Vertical Text, breathes opacity) -->
+      <div class="space-start-hint">PRESS SPACE TO START</div>
+
+      <div class="home-header">
+        <h1 class="game-title animate-title">DINO DASH 3D</h1>
+        <p class="game-subtitle-clip">THE LAST SURVIVOR RUNS...</p>
+        <div class="neon-divider"></div>
+      </div>
+
+      <!-- Character selection carousel row -->
+      <div class="carousel-container">
+        <button id="prev-dino" class="carousel-btn" aria-label="Previous Dinosaur">◀</button>
+        
+        <div class="carousel-main">
+          <!-- circular glow display frame with double-ring animation -->
+          <div class="dino-spotlight-frame">
+            <div class="glow-ring"></div>
+            <!-- The selected active 3D dino will be positioned inside this spotlight view in the map -->
+          </div>
+          
+          <div class="dino-info-card">
+            <button id="btn-toggle-stats" class="stats-toggle-btn" title="Minimize Stats">
+              <span class="toggle-icon">▲</span>
+            </button>
+            <h2 id="dino-name">DINO 1 — TANK</h2>
+            <p id="dino-desc">Heavily armored, steadfast but heavy.</p>
+            
+            <div class="stat-bars">
+              <div class="stat-row">
+                <span class="stat-lbl">SPEED</span>
+                <div class="bar-bg"><div id="stat-speed" class="bar-fill" style="width: 50%"></div></div>
+              </div>
+              <div class="stat-row">
+                <span class="stat-lbl">JUMP</span>
+                <div class="bar-bg"><div id="stat-jump" class="bar-fill" style="width: 40%"></div></div>
+              </div>
+              <div class="stat-row">
+                <span class="stat-lbl">ARMOR</span>
+                <div class="bar-bg"><div id="stat-armor" class="bar-fill" style="width: 80%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button id="next-dino" class="carousel-btn" aria-label="Next Dinosaur">▶</button>
+      </div>
+
+      <!-- Menu Navigation Buttons (2x2 Grid) -->
+      <div class="menu-actions">
+        <button id="btn-start" class="btn btn-primary pulse" aria-label="Start Game">▶ START DASH</button>
+        <button id="btn-leaderboard" class="btn btn-secondary" aria-label="View Highscores">🏆 HIGHSCORES</button>
+        <button id="btn-settings" class="btn btn-secondary" aria-label="Adjust Settings">⚙ SETTINGS</button>
+        <button id="btn-how" class="btn btn-secondary" aria-label="How to Play Instructions">❔ HOW TO PLAY</button>
+      </div>
+
+      <!-- Bottom Level Preview Panel (Decorative Pills) -->
+      <div class="level-preview-panel">
+        <div class="level-pill" style="--glow-color: #ffb366;">
+          <span class="pill-badge">L1</span> PREHISTORIC PLAINS
+        </div>
+        <div class="level-pill" style="--glow-color: #ff5500;">
+          <span class="pill-badge" style="background: #ff5500; color: #fff;">L2</span> VOLCANIC BADLANDS
+        </div>
+        <div class="level-pill" style="--glow-color: #00ccff;">
+          <span class="pill-badge" style="background: #00ccff; color: #000;">L3</span> RUINS AT NIGHT
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. ACTIVE IN-GAME HUD -->
+    <div id="hud" class="ui-overlay">
+      <div id="death-flash" class="death-flash-overlay"></div>
+      
+      <div class="hud-top">
+        <div class="hud-group lives-box hud-fade-in-group">
+          <div id="hearts-container">❤️❤️❤️</div>
+        </div>
+        
+        <div class="hud-group score-box hud-fade-in-group">
+          <div class="score-lbl">SCORE</div>
+          <div id="score-val">000000</div>
+          <div id="multiplier-badge" class="badge">1x</div>
+        </div>
+
+        <div class="hud-group high-score-box hud-fade-in-group">
+          <div class="score-lbl text-xs">HIGH</div>
+          <div id="high-score-val" class="font-mono">000000</div>
+        </div>
+
+        <!-- Custom Circular SVG Speed Gauge + Level indicator -->
+        <div class="hud-group speed-box hud-fade-in-group">
+          <div class="gauge-container">
+            <svg class="speed-gauge-svg" viewBox="0 0 100 100">
+              <circle class="gauge-bg" cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.06)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="188.5 251.3" transform="rotate(135 50 50)" />
+              <circle id="gauge-fill" cx="50" cy="50" r="40" stroke="#00cc88" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="188.5 251.3" stroke-dashoffset="188.5" transform="rotate(135 50 50)" />
+            </svg>
+            <div class="gauge-readout">
+              <span id="level-num">LEVEL 1</span>
+              <div>
+                <span id="speed-val">8.0</span>
+                <span class="gauge-unit">m/s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-group pause-box hud-fade-in-group">
+          <button id="btn-pause-action" class="pause-hud-btn" title="Pause Game (Press P)">
+            <span class="pause-icon">⏸</span> <span class="pause-text">PAUSE</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Boss Warning banner (hidden by default) -->
+      <div id="boss-alert" class="boss-banner hidden">
+        <div class="boss-decor animate-shake">⚠ BOSS RUNNER INCOMING! ⚠</div>
+      </div>
+
+      <!-- Score Event Popups Floating Container -->
+      <div id="hud-popups"></div>
+
+      <!-- Bottom Progress Bar -->
+      <div class="hud-bottom hud-fade-in-group">
+        <div class="progress-bar-label">LEVEL PROGRESS</div>
+        <div class="progress-bar-container">
+          <div id="level-progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Virtual On Screen Buttons for Mobile Layout -->
+      <div id="mobile-controls">
+        <button id="mobile-duck" class="m-btn m-btn-duck" aria-label="Duck">
+          <span class="m-icon">↓</span>
+          <span class="m-label">DUCK</span>
+        </button>
+        <button id="mobile-jump" class="m-btn m-btn-jump" aria-label="Jump">
+          <span class="m-icon">↑</span>
+          <span class="m-label">JUMP</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cinematic Game Start Countdown Overlay -->
+    <div id="countdown-overlay" class="hidden"></div>
+
+    <!-- 4. LEVEL COMPLETE SCREEN -->
+    <div id="level-complete-screen" class="ui-screen screen-blur-overlay">
+      <div class="modal-card select-none text-center">
+        <h1 class="neon-title">LEVEL COMPLETE!</h1>
+        <h2 id="complete-level-name" class="subtitle">PREHISTORIC PLAINS</h2>
+        
+        <div class="bonus-list">
+          <div class="bonus-item">
+            <span>Surviving Time Bonus:</span>
+            <span id="bonus-time">+500 pts</span>
+          </div>
+          <div class="bonus-item">
+            <span>Enemies Dodged:</span>
+            <span id="bonus-passed">+300 pts</span>
+          </div>
+          <div class="bonus-item highlight">
+            <span>Total Level Gains:</span>
+            <span id="bonus-total">+800 pts</span>
+          </div>
+        </div>
+
+        <button id="btn-next-level" class="btn btn-primary pulse">TAP TO CONTINUE</button>
+      </div>
+    </div>
+
+    <!-- 5. GAME OVER SCREEN -->
+    <div id="game-over-screen" class="ui-screen screen-blur-overlay">
+      <div class="crack-svg-container animate-crack"></div>
+      
+      <div class="modal-card text-center">
+        <h1 class="danger-title text-shadow-red animate-shake">GAME OVER</h1>
+        <p class="subtitle mt-1">Your dino collided!</p>
+        
+        <div class="score-summary font-mono">
+          <div class="summary-row">
+            <span>FINAL SCORE:</span>
+            <span id="end-score" class="accent">001240</span>
+          </div>
+          <div class="summary-row">
+            <span>HIGH SCORE:</span>
+            <span id="end-high-score">002500</span>
+          </div>
+        </div>
+
+        <!-- Rating Stars -->
+        <div id="star-rating" class="stars-row">
+          <span class="star">★</span>
+          <span class="star">★</span>
+          <span class="star">★</span>
+        </div>
+
+        <p id="high-score-notify" class="new-record hidden">🎉 NEW HIGH SCORE! 🎉</p>
+
+        <div class="modal-btn-row">
+          <button id="btn-retry" class="btn btn-primary font-bold">🔄 PLAY AGAIN</button>
+          <button id="btn-over-home" class="btn btn-secondary">🏠 HOME</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. VICTORY / GAME BEATEN SCREEN -->
+    <div id="victory-screen" class="ui-screen">
+      <div class="modal-card text-center success-glow">
+        <h1 class="trophy-title">🏆 YOU WIN! 🏆</h1>
+        <p class="subtitle">You dominated the prehistoric world!</p>
+
+        <div class="victory-stats select-none">
+          <div class="v-stat">
+            <span class="stat-value" id="v-score">006520</span>
+            <span class="stat-label">TOTAL SCORE</span>
+          </div>
+          <div class="v-stat">
+            <span class="stat-value" id="v-passed">45</span>
+            <span class="stat-label">ENEMIES PASSED</span>
+          </div>
+          <div class="v-stat">
+            <span class="stat-value" id="v-lives">3/3</span>
+            <span class="stat-label">REMAINING LIVES</span>
+          </div>
+        </div>
+
+        <p class="tagline">All 5 dinos are marching in your honor!</p>
+
+        <div class="modal-btn-row">
+          <button id="btn-victory-again" class="btn btn-primary pulse">🔄 PLAY AGAIN</button>
+          <button id="btn-victory-home" class="btn btn-secondary">🏠 HOME</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. IN-GAME PAUSE SCREEN -->
+    <div id="pause-screen" class="ui-screen screen-blur-overlay">
+      <div class="modal-card text-center select-none shadow-orange">
+        <h1 class="logo-title pulse text-orange" style="font-size: 3.5rem; line-height: 1;">GAME PAUSED</h1>
+        <p class="subtitle mt-2">Dino is resting in the shade.</p>
+        <p class="font-mono text-xs mt-1" style="color: #a0aec0; letter-spacing: 0.5px;">Press 'P' or click RESUME to return</p>
+        
+        <div class="modal-btn-row" style="margin-top: 1.5rem;">
+          <button id="btn-pause-resume" class="btn btn-primary pulse">▶ RESUME</button>
+          <button id="btn-pause-quit" class="btn btn-secondary" style="border-color: #f56565; color: #f56565;">🚪 QUIT RUN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. SETTINGS MODAL -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal-card shadow-orange">
+        <div class="modal-header">
+          <h2>SETTINGS</h2>
+          <button class="close-modal pointer btn-close">✖</button>
+        </div>
+        <div class="modal-body font-sans">
+          
+          <div class="option-row">
+            <label>SOUND & MUSIC</label>
+            <button id="opt-sound-toggle" class="toggle-btn active">ON</button>
+          </div>
+          
+          <div class="option-row">
+            <label>GRAPHICS QUALITY</label>
+            <div class="segmented-control">
+              <button id="g-low" class="seg-btn">LOW (NO SHADOWS)</button>
+              <button id="g-high" class="seg-btn active">HIGH</button>
+            </div>
+          </div>
+
+          <div class="option-row text-xs opacity-60 flex-col mb-0">
+            <p>Three.js WebGL Engine running r128.</p>
+            <p>Custom audio filters synthesized procedurally.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. HOW TO PLAY MODAL -->
+    <div id="how-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>HOW TO PLAY</h2>
+          <button class="close-modal pointer btn-close">✖</button>
+        </div>
+        <div id="how-modal-body" class="modal-body text-center font-sans">
+          <div class="controls-diagram">
+            <div class="control-key">
+              <div class="key">Space / W / ▲</div>
+              <span>JUMP / DOUBLE JUMP</span>
+            </div>
+            <div class="control-key">
+              <div class="key">S / ▼</div>
+              <span>DUCK / CRUCH SLIDE</span>
+            </div>
+            <div class="control-key">
+              <div class="key">P / ESC</div>
+              <span>PAUSE RUN</span>
+            </div>
+          </div>
+          
+          <p class="instructions font-bold text-orange mt-2">
+            Avoid running dinosaurs, pterodactyls, and crumbling ground tiles!
+          </p>
+          <p class="instructions text-sm opacity-85">
+            Dodge by jumping or ducking. Complete level times to unlock new eras!
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. LEADERBOARD / HIGH SCORES MODAL -->
+    <div id="leaderboard-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>🏆 HIGH SCORES</h2>
+          <button class="close-modal pointer btn-close">✖</button>
+        </div>
+        <div class="modal-body text-center">
+          <div id="leaderboard-list" class="leaderboard-box font-mono">
+            <!-- Dynamically populated rows -->
+            <div class="lead-row empty">No high scores recorded. Make a dash!</div>
+          </div>
+          <button id="btn-clear-leaderboard" class="btn btn-secondary select-all text-xs opacity-75 mt-2">CLEAR HIGHSCORES</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Game Entry Point Module -->
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
