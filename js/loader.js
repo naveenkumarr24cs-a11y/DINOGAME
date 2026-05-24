@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { SkeletonUtils } from 'three/addons/utils/SkeletonUtils.js';
 import { CONSTANTS } from './constants.js';
 
 class Loader {

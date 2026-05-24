@@ -221,7 +221,7 @@ class MapBuilder {
 
   spawnMountain(startX) {
     const geo = new THREE.ConeGeometry(8 + Math.random() * 6, 12 + Math.random() * 8, 4);
-    const mat = new THREE.MeshLambertMaterial({
+    const mat = new THREE.MeshPhongMaterial({
       color: 0xc87d55, // Matches Level 1
       flatShading: true
     });
@@ -281,7 +281,7 @@ class MapBuilder {
       meshGroup.add(trunk);
 
       // Fronds
-      const leavesMat = new THREE.MeshLambertMaterial({ color: 0x2e5c1e, flatShading: true });
+      const leavesMat = new THREE.MeshPhongMaterial({ color: 0x2e5c1e, flatShading: true });
       for (let i = 0; i < 5; i++) {
         const frondGeo = new THREE.ConeGeometry(0.7, 1.8, 4);
         const frond = new THREE.Mesh(frondGeo, leavesMat);
@@ -294,7 +294,7 @@ class MapBuilder {
     } 
     else if (type < 0.8) {
       // 2. Prehistoric Rock Cluster
-      const rockMat = new THREE.MeshLambertMaterial({ color: 0x808080, flatShading: true });
+      const rockMat = new THREE.MeshPhongMaterial({ color: 0x808080, flatShading: true });
       const count = 1 + Math.floor(Math.random() * 3);
       for (let i = 0; i < count; i++) {
         const size = 0.5 + Math.random() * 0.9;
@@ -312,7 +312,7 @@ class MapBuilder {
     } 
     else {
       // 3. Prehistoric Fern
-      const fernMat = new THREE.MeshLambertMaterial({ color: 0x1e4620, flatShading: true });
+      const fernMat = new THREE.MeshPhongMaterial({ color: 0x1e4620, flatShading: true });
       for (let i = 0; i < 6; i++) {
         const bladeGeo = new THREE.ConeGeometry(0.2, 1.4, 3);
         const blade = new THREE.Mesh(bladeGeo, fernMat);
